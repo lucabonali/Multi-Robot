@@ -4,6 +4,8 @@ from Tree import *
 from Path import *
 
 target = "T"
+wall = "#"
+toExpand = []
 
 
 def getListOfPosition(mapChar):
@@ -16,33 +18,46 @@ def getListOfPosition(mapChar):
 
 def constructTree(mapChar, tree):
     if checkTarget(tree.root):
+        print("Target Found:", tree.root)
         return tree
     else:
+        tree.addChildren(tree.root)
+        toExpand.append(tree.root)
         listPosition = getListOfPosition(mapChar)
-        addChildrenToTree(tree.root, listPosition, mapChar)
+        sol = expand(tree, tree.root, listPosition, mapChar)
+        return sol
 
-
-def alreadyIn(listPosition, coord):
+def available(listPosition, coord):
     for i in range(len(listPosition)):
         if listPosition[i] == coord:
+            listPosition.remove(coord)
             return True
     return False
 
 
-def addChildrenToTree(node, listPosition, mapChar):
+def expand(tree, node, listPosition, mapChar):
+    toExpand.remove(node)
     for i in range(len(node.adjacents)):
         xCoord = node.adjacents[i][0]
         yCoord = node.adjacents[i][1]
-        if not alreadyIn(listPosition, (xCoord, yCoord)):
-            listPosition.remove((xCoord, yCoord))
+        if available(listPosition,(xCoord,yCoord)):
             try:
                 value = mapChar[xCoord][yCoord]
-                child = Node(father=node, xCoord=xCoord, yCoord=yCoord, value=value)
-                node.addChildren(child)
-                if not value == target:
-                    addChildrenToTree(node.children[i], listPosition, mapChar)
+                if not value == wall:
+                    child = Node(father=node, xCoord=xCoord, yCoord=yCoord, value=value)
+                    node.addChildren(child)
+                    tree.children.append(child)
+                    toExpand.append(child)
+                    #print("I am node:", node.value, node.xCoord, node.yCoord, "Children added :", child.xCoord, child.yCoord, child.value)
             except:
                 pass
+    for i in range(len(node.children)):
+        if checkTarget(node.children[i]):
+            print("Solution Found")
+            toExpand.clear()
+            return node.children[i]
+    if not len(toExpand) == 0:
+        return expand(tree, toExpand[0], listPosition, mapChar)
 
 
 def checkTarget(node):
@@ -51,14 +66,12 @@ def checkTarget(node):
     return False
 
 
-def addNodeToPath(path, treeRoot, index):
-    path.addNode(treeRoot.children[index])
-    addNodeToPath(treeRoot.children[index])
+def constructPath(node, path):
+    if node == None:
+        return path
+    path.addNode(node)
+    return constructPath(node.father,path)
 
-
-def constructPath(treeRoot):
-    path = Path()
-    addNodeToPath(path,treeRoot, 0)
 
 
 def startRouting(path):
@@ -66,15 +79,15 @@ def startRouting(path):
     mapHandler.readMap()
     mapChar = mapHandler.map
     start = (1, 2)
-    target = (7, 8)
+
     mapChar[1][2] = "S"
     mapChar[7][8] = target
 
     treeRoot = Node(father=None, xCoord=start[0], yCoord=start[1], value=mapChar[start[0]][start[1]])
     tree = Tree(treeRoot)
-    constructTree(mapChar, tree)
+    targetLeaf = constructTree(mapChar, tree)
 
-    constructPath(treeRoot)
-
+    path = constructPath(targetLeaf, Path()).path
+    path.toString()
 
 startRouting("Map.txt")
