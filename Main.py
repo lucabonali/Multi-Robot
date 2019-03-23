@@ -87,7 +87,9 @@ def startRouting(path):
     tree = Tree(treeRoot)
     targetLeaf = constructTree(mapChar, tree)
 
-    path = constructPath(targetLeaf, Path()).path
+    path = constructPath(targetLeaf, Path())
+    path.path.reverse()
     path.toString()
+
 
 startRouting("Map.txt")
