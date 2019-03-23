@@ -1,9 +1,11 @@
 class Node():
-    def __init__(self,xCoord,yCoord,value):
+    def __init__(self,father,xCoord,yCoord,value):
         self.xCoord = xCoord
         self.yCoord = yCoord
         self.value = value
         self.adjacents = self.initializeAdjList()
+        self.father = father
+        self.children = []
 
     def initializeAdjList(self):
         list = []
@@ -16,3 +18,7 @@ class Node():
         list.append((self.xCoord + 1, self.yCoord - 1))
         list.append((self.xCoord , self.yCoord - 1))
         return list
+
+
+    def addChildren(self, node):
+        self.children.append(node)
