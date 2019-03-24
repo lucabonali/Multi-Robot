@@ -13,5 +13,4 @@ class Path():
 
     def toString(self):
         for i in range(len(self.path)):
-            if not self.path[i] is None:
                 print(i,"Node:",self.path[i].xCoord,self.path[i].yCoord)
