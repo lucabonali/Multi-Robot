@@ -10,13 +10,13 @@ class Node():
 
     def initializeAdjList(self):
         list = []
-        list.append((self.xCoord - 1, self.yCoord - 1))
+        #list.append((self.xCoord - 1, self.yCoord - 1))
         list.append((self.xCoord - 1, self.yCoord ))
-        list.append((self.xCoord - 1, self.yCoord + 1))
+        #list.append((self.xCoord - 1, self.yCoord + 1))
         list.append((self.xCoord , self.yCoord + 1))
-        list.append((self.xCoord + 1, self.yCoord + 1))
+        #list.append((self.xCoord + 1, self.yCoord + 1))
         list.append((self.xCoord + 1, self.yCoord ))
-        list.append((self.xCoord + 1, self.yCoord - 1))
+        #list.append((self.xCoord + 1, self.yCoord - 1))
         list.append((self.xCoord , self.yCoord - 1))
         return list
 

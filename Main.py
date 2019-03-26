@@ -16,6 +16,19 @@ def createAgents(robPos,tarPos,mapChar):
         print("AGENT " , i ,":")
         agentList[i].path.toString()
 
+
+def colorPaths(mapChar):
+    for i in range(len(agentList)):
+        for j in range(len(agentList[i].path.path)):
+            xCoord = agentList[i].path.path[j].xCoord
+            yCoord = agentList[i].path.path[j].yCoord
+            mapChar[xCoord][yCoord] = "P"
+
+def printMap(mapChar):
+    for i in range(len(mapChar)):
+        print("".join(mapChar[i]))
+
+
 def startRouting(path):
     mapHandler = MapHandler(path)
     mapHandler.readMap()
@@ -24,7 +37,9 @@ def startRouting(path):
     targetPos = mapHandler.targetPos
 
     createAgents(robotPos,targetPos,mapChar)
-
+    colorPaths(mapChar)
+    printMap(mapChar)
+    print("\033[5;34;46  Bright Green ")
 
 
 startRouting("Map.txt")

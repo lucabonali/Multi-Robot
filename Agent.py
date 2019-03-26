@@ -83,6 +83,6 @@ class Agent():
         h = child.heuristic
         for i in range(len(self.toExpand)):
             if self.toExpand[i].heuristic >= h:
-                self.toExpand.insert(i,child)
+                self.toExpand.insert(i+6,child)
                 return
         self.toExpand.append(child)
