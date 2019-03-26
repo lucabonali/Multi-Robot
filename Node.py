@@ -3,6 +3,7 @@ class Node():
         self.xCoord = xCoord
         self.yCoord = yCoord
         self.value = value
+        self.heuristic = None
         self.adjacents = self.initializeAdjList()
         self.father = father
         self.children = []
@@ -18,6 +19,7 @@ class Node():
         list.append((self.xCoord + 1, self.yCoord - 1))
         list.append((self.xCoord , self.yCoord - 1))
         return list
+
 
 
     def addChildren(self, node):
