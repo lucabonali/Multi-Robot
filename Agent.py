@@ -65,7 +65,8 @@ class Agent():
     def constructPath(self,node, path):
         if node == None:
             return path
-        path.addNode(node)
+        if not (node.value == "R" or self.checkTarget(node)):
+            path.addNode(node)
         return self.constructPath(node.father, path)
 
     def setHeuristic(self, node):
@@ -83,6 +84,6 @@ class Agent():
         h = child.heuristic
         for i in range(len(self.toExpand)):
             if self.toExpand[i].heuristic >= h:
-                self.toExpand.insert(i+6,child)
+                self.toExpand.insert(i+5,child)
                 return
         self.toExpand.append(child)
