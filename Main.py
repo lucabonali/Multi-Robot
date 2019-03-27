@@ -53,5 +53,3 @@ def startRouting(path):
 
 startRouting("Map.txt")
 
-
-print(Fore.BLUE + "Hello World")
