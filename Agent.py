@@ -1,14 +1,36 @@
 from Node import *
 from Path import *
+import threading
+
 
 class Agent():
-    def __init__(self,position,targets):
+    def __init__(self,position,targets, agentNode, mapChar):
         self.targetString = "T"
         self.wallString = "#"
         self.toExpand = []
         self.targets = targets
         self.position = position
-        self.path = []
+        self.path = Path()
+        self.agentNode = agentNode
+        self.mapChar = mapChar
+        self.objNode = None
+
+    def run(self):
+        t = threading.Thread(target=self.constructTree())
+        t.start()
+
+    def constructTree(self):
+        if self.checkTarget(self.agentNode):
+            print("Target Found:", self.agentNode)
+            self.objNode = self.agentNode
+        else:
+            self.toExpand.append(self.agentNode)
+            self.setHeuristic(self.agentNode)
+            listPosition = self.getListOfPosition(self.mapChar)
+            self.expand(self.agentNode, listPosition, self.mapChar)
+            self.path = self.constructPath(self.objNode, self.path)
+            self.path.path.reverse()
+            self.path.toString()
 
     def getListOfPosition(self,mapChar):
         list = []
@@ -16,23 +38,6 @@ class Agent():
             for j in range(len(mapChar[i])):
                 list.append((i, j))
         return list
-
-    def constructTree(self,mapChar, node):
-        if self.checkTarget(node):
-            print("Target Found:", node)
-            return node
-        else:
-            self.toExpand.append(node)
-            self.setHeuristic(node)
-            listPosition = self.getListOfPosition(mapChar)
-            return self.expand(node, listPosition, mapChar)
-
-    def available(self,listPosition, coord):
-        for i in range(len(listPosition)):
-            if listPosition[i] == coord:
-                listPosition.remove(coord)
-                return True
-        return False
 
     def expand(self, node, listPosition, mapChar):
         self.toExpand.remove(node)
@@ -53,9 +58,16 @@ class Agent():
         for i in range(len(node.children)):
             if self.checkTarget(node.children[i]):
                 self.toExpand.clear()
-                return node.children[i]
+                self.objNode = node.children[i]
         if not len(self.toExpand) == 0:
-            return self.expand(self.toExpand[0], listPosition, mapChar)
+            self.expand(self.toExpand[0], listPosition, mapChar)
+
+    def available(self,listPosition, coord):
+        for i in range(len(listPosition)):
+            if listPosition[i] == coord:
+                listPosition.remove(coord)
+                return True
+        return False
 
     def checkTarget(self,node):
         if node.value == self.targetString:
@@ -65,7 +77,7 @@ class Agent():
     def constructPath(self,node, path):
         if node == None:
             return path
-        if not (node.value == "R" or self.checkTarget(node)):
+        if not (node.value == "R"):
             path.addNode(node)
         return self.constructPath(node.father, path)
 
