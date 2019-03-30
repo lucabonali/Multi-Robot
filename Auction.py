@@ -1,7 +1,7 @@
 from colorama import Fore
-
 from Agent import Agent
 from MapHandler import *
+from MiniSumAgent import MiniSumAgent
 from Node import Node
 
 
@@ -11,7 +11,7 @@ class Auction():
         self.robotPos = []
         self.targetPos = []
         self.agentList = []
-
+        self.bidList = []
 
     def startRoutingAuction(self, path):
         mapHandler = MapHandler(path)
@@ -23,19 +23,27 @@ class Auction():
         drawer = self.Drawer(self.agentList)
         drawer.printMap(self.mapChar)
 
-    def createAgents(self,robPos, tarPos, mapChar):
+    def createAgents(self, robPos, tarPos, mapChar):
         for i in range(len(robPos)):
             agentNode = Node(father=None, xCoord=robPos[i][0], yCoord=robPos[i][1], value="R")
-            self.agentList.append(Agent(robPos[i], tarPos, agentNode, mapChar))
-            self.agentList[i].run()
+            self.agentList.append(MiniSumAgent(len(robPos),robPos[i], tarPos, agentNode, mapChar))
+        for i in self.agentList:
+            i.otherRobots = self.getOtherRobots(i)
+            i.computeNearTargetPath()
 
 
+    def getOtherRobots(self, agent):
+        list = []
+        for i in self.agentList:
+            if not agent == i:
+                list.append(i)
+        return list
 
 
 
 
     class Drawer():
-        def __init__(self,agentList):
+        def __init__(self, agentList):
             self.colorList = []
             self.agentList = agentList
 
@@ -46,7 +54,7 @@ class Auction():
             self.colorList.append(Fore.CYAN)
             self.colorList.append(Fore.LIGHTMAGENTA_EX)
 
-        def colorPaths(self,mapChar):
+        def colorPaths(self, mapChar):
             self.initializeColorList()
             for i in range(len(self.agentList)):
                 for j in range(len(self.agentList[i].path.path) - 1):
@@ -54,8 +62,8 @@ class Auction():
                     yCoord = self.agentList[i].path.path[j].yCoord
                     mapChar[xCoord][yCoord] = self.colorList[i] + "*" + Fore.WHITE
 
-
-        def printMap(self,mapChar):
+        def printMap(self, mapChar):
             self.colorPaths(mapChar)
             for i in range(len(mapChar)):
                 print("".join(mapChar[i]))
+

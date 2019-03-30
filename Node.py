@@ -24,3 +24,6 @@ class Node():
 
     def addChildren(self, node):
         self.children.append(node)
+
+    def toString(self):
+        print("XCOORD : ", self.xCoord, " YCOORD :", self.yCoord," Value:", self.value)

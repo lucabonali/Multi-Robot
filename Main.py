@@ -4,5 +4,5 @@ def startRouting(path):
     auction = Auction()
     auction.startRoutingAuction(path)
 
-startRouting("Map.txt")
+startRouting("MapEasy")
 

@@ -4,9 +4,10 @@ import threading
 
 
 class Agent():
-    def __init__(self,position,targets, agentNode, mapChar):
+    def __init__(self,nRobots,position,targets, agentNode, mapChar):
         self.targetString = "T"
         self.wallString = "#"
+        self.nRobots = nRobots
         self.toExpand = []
         self.targets = targets
         self.position = position
@@ -14,23 +15,76 @@ class Agent():
         self.agentNode = agentNode
         self.mapChar = mapChar
         self.objNode = None
+        self.bid = None
+        self.bidList = []
+        self.otherRobots = []
 
-    def run(self):
+
+    def computeNearTargetPath(self):
         t = threading.Thread(target=self.constructTree())
         t.start()
+        t.join()
+        print("CIAOOOOOOOONE ", len(self.path.path))
+        self.computeBid()
+        self.broadCastBid()
+
+    def broadCastBid(self):
+        for i in self.otherRobots:
+            i.receiveBid(self.bid)
+
+
+    def receiveBid(self, bid):
+        self.bidList.append(bid)
+        print("I am ROBOT : ",self.agentNode.toString(),"/////////////// BID RECEIVED:" , bid.toString())
+        if len(self.bidList) == len(self.otherRobots):
+            self.computeRoundWinner()
+
+
+    def computeRoundWinner(self):
+        winningBid = 100000000
+        winningAgent = None
+        for i in self.bidList:
+            if i.value < winningBid:
+                winningBid = i.value
+                winningAgent = i.bidder
+        if self == winningAgent:
+            self.updateAllocation()
+            x = self.bid.targetNode.xCoord
+            y = self.bid.targetNode.yCoord
+            self.signTarget(x,y)
+            self.sendUpdateMap(x,y)
+        self.startNewRound()
+
+    def sendUpdateMap(self, x, y):
+        for i in self.otherRobots:
+            i.signTarget(x,y)
+
+    def signTarget(self,x , y):
+        self.mapChar[x][y] = "t"
+        self.targets.remove((x,y))
+
+
+    def startNewRound(self):
+        if len(self.targets) == 0:
+            #END OF THE ALGORITHM
+            pass
+        self.computeNearTargetPath()
+
 
     def constructTree(self):
+        listPosition = self.getListOfPosition(self.mapChar)
         if self.checkTarget(self.agentNode):
             print("Target Found:", self.agentNode)
             self.objNode = self.agentNode
         else:
             self.toExpand.append(self.agentNode)
             self.setHeuristic(self.agentNode)
-            listPosition = self.getListOfPosition(self.mapChar)
             self.expand(self.agentNode, listPosition, self.mapChar)
             self.path = self.constructPath(self.objNode, self.path)
             self.path.path.reverse()
-            self.path.toString()
+            #self.path.toString()
+            self.toExpand.clear()
+
 
     def getListOfPosition(self,mapChar):
         list = []
@@ -99,3 +153,12 @@ class Agent():
                 self.toExpand.insert(i+5,child)
                 return
         self.toExpand.append(child)
+
+    def computeBid(self):
+        pass
+
+    def updateAllocation(self):
+        pass
+
+
+
