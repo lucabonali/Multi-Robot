@@ -1,22 +1,22 @@
-from Agent import Agent
+from RoutingAgent import RoutingAgent
 from Bid import Bid
 
 
-class MiniSumAgent(Agent):
-    def __init__(self,nRobots,position,targets, agentNode, mapChar):
-        super().__init__(nRobots,position,targets, agentNode, mapChar)
-        self.newRPC = len(self.path.path)
+class MiniSumRoutingAgent(RoutingAgent):
+    def __init__(self,unique_id, model,nRobots,position,targets, agentNode, mapChar):
+        super().__init__(unique_id, model,nRobots,position,targets, agentNode, mapChar)
+        self.newRPC = 0
         self.oldRPC = 0
 
-        #NON VA QUESTA CAZZO DI COSA
+
     def computeBid(self):
-        print("COMPUTING THE BID")
+        self.newRPC = len(self.path.path)
         value = self.newRPC - self.oldRPC
         target = self.path.path[-1]
-        self.bid = Bid(self,value,target)
+        self.bid.value = value
+        self.bid.targetNode = target
         self.oldRPC = self.newRPC
-        print("BID COMPUTAZIOOO////////////////////////////////////")
-        self.bid.toString()
+
 
     def updateAllocation(self):
         self.agentNode = self.path.path[-1]

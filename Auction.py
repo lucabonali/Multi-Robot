@@ -1,17 +1,27 @@
 from colorama import Fore
-from Agent import Agent
+from mesa import Model
+from mesa.time import RandomActivation
+
+from RoutingAgent import RoutingAgent
+from Drawer import Drawer
 from MapHandler import *
-from MiniSumAgent import MiniSumAgent
+from MiniSumAgent import MiniSumRoutingAgent
 from Node import Node
 
 
-class Auction():
-    def __init__(self):
+class Auction(Model):
+    def __init__(self, path):
+        self.schedule = RandomActivation(self)
         self.mapChar = []
         self.robotPos = []
         self.targetPos = []
-        self.agentList = []
         self.bidList = []
+
+        self.startRoutingAuction(path)
+
+    #Should be called from the main function to advance the auction by one step, in a random way
+    def step(self):
+        self.schedule.step()
 
     def startRoutingAuction(self, path):
         mapHandler = MapHandler(path)
@@ -20,50 +30,20 @@ class Auction():
         self.robotPos = mapHandler.robotPos
         self.targetPos = mapHandler.targetPos
         self.createAgents(self.robotPos, self.targetPos, self.mapChar)
-        drawer = self.Drawer(self.agentList)
-        drawer.printMap(self.mapChar)
 
     def createAgents(self, robPos, tarPos, mapChar):
         for i in range(len(robPos)):
             agentNode = Node(father=None, xCoord=robPos[i][0], yCoord=robPos[i][1], value="R")
-            self.agentList.append(MiniSumAgent(len(robPos),robPos[i], tarPos, agentNode, mapChar))
-        for i in self.agentList:
+            a = MiniSumRoutingAgent(i,self,len(robPos), robPos[i], tarPos, agentNode, mapChar)
+            self.schedule.add(a)
+
+        for i in self.schedule.agents:
             i.otherRobots = self.getOtherRobots(i)
-            i.computeNearTargetPath()
 
 
     def getOtherRobots(self, agent):
         list = []
-        for i in self.agentList:
+        for i in self.schedule.agents:
             if not agent == i:
                 list.append(i)
         return list
-
-
-
-
-    class Drawer():
-        def __init__(self, agentList):
-            self.colorList = []
-            self.agentList = agentList
-
-        def initializeColorList(self):
-            self.colorList.append(Fore.GREEN)
-            self.colorList.append(Fore.BLUE)
-            self.colorList.append(Fore.RED)
-            self.colorList.append(Fore.CYAN)
-            self.colorList.append(Fore.LIGHTMAGENTA_EX)
-
-        def colorPaths(self, mapChar):
-            self.initializeColorList()
-            for i in range(len(self.agentList)):
-                for j in range(len(self.agentList[i].path.path) - 1):
-                    xCoord = self.agentList[i].path.path[j].xCoord
-                    yCoord = self.agentList[i].path.path[j].yCoord
-                    mapChar[xCoord][yCoord] = self.colorList[i] + "*" + Fore.WHITE
-
-        def printMap(self, mapChar):
-            self.colorPaths(mapChar)
-            for i in range(len(mapChar)):
-                print("".join(mapChar[i]))
-

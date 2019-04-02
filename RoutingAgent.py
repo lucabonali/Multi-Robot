@@ -1,10 +1,13 @@
+from mesa import Agent
+from Bid import Bid
 from Node import *
 from Path import *
 import threading
 
 
-class Agent():
-    def __init__(self,nRobots,position,targets, agentNode, mapChar):
+class RoutingAgent(Agent):
+    def __init__(self,unique_id, model,nRobots,position,targets, agentNode, mapChar):
+        super().__init__(unique_id, model)
         self.targetString = "T"
         self.wallString = "#"
         self.nRobots = nRobots
@@ -15,28 +18,33 @@ class Agent():
         self.agentNode = agentNode
         self.mapChar = mapChar
         self.objNode = None
-        self.bid = None
+        self.bid = Bid(self,100000,None)
         self.bidList = []
         self.otherRobots = []
+        self.readyRobot = []
 
+    def step(self):
+        print("Ciao sono un agent", self.unique_id)
 
     def computeNearTargetPath(self):
         t = threading.Thread(target=self.constructTree())
         t.start()
-        t.join()
-        print("CIAOOOOOOOONE ", len(self.path.path))
+
         self.computeBid()
         self.broadCastBid()
 
     def broadCastBid(self):
         for i in self.otherRobots:
+            #print("BIDDER : ", self.bid.bidder, " BID :", self.bid.value," TargetNode", self.bid.targetNode)
             i.receiveBid(self.bid)
 
 
     def receiveBid(self, bid):
         self.bidList.append(bid)
-        print("I am ROBOT : ",self.agentNode.toString(),"/////////////// BID RECEIVED:" , bid.toString())
+        print("I am ROBOT :", self,"/////////////// BID RECEIVED:" , bid.value, "BIDLIST:", self.bidList)
         if len(self.bidList) == len(self.otherRobots):
+            print("LUNGHEZZA BIDLIST :", len(self.bidList))
+            print("SONO PRONTO A FARE IL WINNER")
             self.computeRoundWinner()
 
 
@@ -47,6 +55,8 @@ class Agent():
             if i.value < winningBid:
                 winningBid = i.value
                 winningAgent = i.bidder
+        print("WINNING AGENT:", winningAgent)
+        self.bidList.clear()
         if self == winningAgent:
             self.updateAllocation()
             x = self.bid.targetNode.xCoord
@@ -68,7 +78,22 @@ class Agent():
         if len(self.targets) == 0:
             #END OF THE ALGORITHM
             pass
-        self.computeNearTargetPath()
+        #i have to update all other robots that i am ready to start a new round
+        self.updateRound()
+
+
+    def updateRound(self):
+        for i in self.otherRobots:
+            i.ackEndRound(self)
+
+
+    def ackEndRound(self,robot):
+        print(len(self.readyRobot))
+        self.readyRobot.append(robot)
+        if len(self.readyRobot) == len(self.otherRobots):
+            self.readyRobot.clear()
+            self.computeNearTargetPath()
+
 
 
     def constructTree(self):
